@@ -1,0 +1,19 @@
+# Віртуальне середовище
+venv/
+.venv/
+ENV/
+env/
+
+# Python кеш
+__pycache__/
+*.py[cod]
+*$py.class
+
+# IDE
+.vscode/
+.idea/
+*.iml
+
+# ОС файли
+.DS_Store
+Thumbs.db
