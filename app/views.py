@@ -1,10 +1,9 @@
-from flask import Flask, render_template
-
-app = Flask(__name__)
+from flask import render_template
+from . import app
 
 @app.route('/')
 def main():
-    return 'Hello, world!'
+    return render_template('resume.html', page_title='Моє резюме')
 
 @app.route('/resume')
 def resume():
@@ -17,7 +16,3 @@ def contact():
 @app.route("/form")
 def form():
     return render_template("form.html", page_title='Форма')
-
-
-if __name__ == '__main__':
-    app.run(debug=True)
