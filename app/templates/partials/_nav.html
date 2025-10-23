@@ -1,5 +1,7 @@
  <nav>
         <a href="{{ url_for('main') }}">Головна</a> |
         <a href="{{ url_for('contact') }}">Контакти</a> |
-        <a href="{{ url_for('form') }}">Форма</a>
+        <a href="{{ url_for('form') }}">Форма</a> |
+        <a href="{{ url_for('users.greetings', name='john') }}">Користувач John</a> |
+        <a href="{{ url_for('products.list_products') }}">Продукти</a>
  </nav>
