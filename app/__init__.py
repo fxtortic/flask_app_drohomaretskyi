@@ -3,6 +3,7 @@ from flask import Flask
 app = Flask(__name__)
 app.config.from_pyfile("../config.py")
 app.config["SECRET_KEY"] = "super-secret-key"
+WTF_CSRF_ENABLED = True
 
 from app import views
 from app.users import users_bp

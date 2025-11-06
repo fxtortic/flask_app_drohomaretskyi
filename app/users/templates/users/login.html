@@ -1,15 +1,19 @@
 {% extends "base.html" %}
+{% from "partials/_render_field.html" import render_field %}
 
 {% block content %}
 <h2>Login</h2>
 
-<form method="post" action="{{ url_for('users.login') }}" class="login-form">
-    <label for="username">User name:</label>
-    <input type="text" id="username" name="username" required>
+<form action="{{ url_for('users.login') }}" method="post" novalidate class="login-form">
+    {{ form.hidden_tag() }}
 
-    <label for="password">Password:</label>
-    <input type="password" id="password" name="password" required>
+    {{ render_field(form.username) }}
+    {{ render_field(form.password) }}
 
-    <button type="submit">Sign in</button>
+    <div class="form-group">
+        {{ form.remember() }} {{ form.remember.label }}
+    </div>
+
+    {{ form.submit(class="btn-primary") }}
 </form>
 {% endblock %}

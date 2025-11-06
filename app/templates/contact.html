@@ -1,13 +1,18 @@
 {% extends "base.html" %}
-
-{% block title %}Резюме{% endblock %}
+{% from "partials/_render_field.html" import render_field %}
 
 {% block content %}
-    <body>
-        <h3>Мої контакти для зв'язку зі мною, радий буду почути вас!</h3>
-        <a href="https://web.telegram.org/k/">Telegram</a>
-        <a href="https://www.instagram.com/">Instagram</a>
-        <a href="https://www.facebook.com/?locale=uk_UA">Facebook</a>
-        <a href="https://x.com/?lang=uk">X</a>
-    </body>
+<h1>Контактна форма</h1>
+
+<form method="post" action="{{ url_for('contact') }}" class="contact-form">
+    {{ form.hidden_tag() }}
+
+    {{ render_field(form.name) }}
+    {{ render_field(form.email) }}
+    {{ render_field(form.phone) }}
+    {{ render_field(form.subject) }}
+    {{ render_field(form.message) }}
+
+    <button type="submit" class="btn-primary">{{ form.submit.label.text }}</button>
+</form>
 {% endblock %}

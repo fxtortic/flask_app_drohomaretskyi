@@ -1,3 +1,4 @@
+from app.forms import LoginForm
 from flask import render_template, request, redirect, url_for, flash, session, make_response
 from app.users import users_bp
 
@@ -11,19 +12,28 @@ def greetings(name):
 
 @users_bp.route("/login", methods=["GET", "POST"])
 def login():
-    if request.method == "POST":
-        username = request.form.get("username", "")
-        password = request.form.get("password", "")
+    form = LoginForm()
+
+    if form.validate_on_submit():
+        username = form.username.data
+        password = form.password.data
+        remember = form.remember.data
 
         if username == "admin" and password == "1234":
             session["user"] = username
-            flash("Вхід виконано успішно!", "success")
+            msg = "Вхід виконано успішно."
+            if remember:
+                msg += " (опція 'запамʼятати' увімкнена)"
+            flash(msg, "success")
             return redirect(url_for("users.profile"))
         else:
-            flash("Невірний логін або пароль. Спробуйте ще раз!", "error")
+            flash("Невірний логін або пароль!", "error")
             return redirect(url_for("users.login"))
 
-    return render_template("users/login.html", page_title="Login")
+    if request.method == "POST" and not form.validate():
+        flash("Перевірте правильність заповнення форми.", "error")
+
+    return render_template("users/login.html", page_title="Login", form=form)
 
 
 @users_bp.route("/profile", methods=["GET", "POST"])
