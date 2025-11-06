@@ -1,7 +1,15 @@
- <nav>
-        <a href="{{ url_for('main') }}">Головна</a> |
-        <a href="{{ url_for('contact') }}">Контакти</a> |
-        <a href="{{ url_for('form') }}">Форма</a> |
-        <a href="{{ url_for('users.greetings', name='john') }}">Користувач John</a> |
-        <a href="{{ url_for('products.list_products') }}">Продукти</a>
- </nav>
+<nav>
+    <a href="{{ url_for('main') }}">Головна</a> |
+    <a href="{{ url_for('contact') }}">Контакти</a> |
+    <a href="{{ url_for('form') }}">Форма</a> |
+    <a href="{{ url_for('users.greetings', name='john') }}">Користувач John</a> |
+    <a href="{{ url_for('products.list_products') }}">Продукти</a> |
+
+    {% if session.get('user') %}
+        <!-- якщо брати без умови, то стоїть умова що якщо ти не авторизований і заходиш на профайл він перевідправляє на логін /!-->
+        <a href="{{ url_for('users.profile') }}">Профіль</a> |
+        <a href="{{ url_for('users.logout') }}">Вийти</a>
+    {% else %}
+        <a href="{{ url_for('users.login') }}">Вхід</a>
+    {% endif %}
+</nav>
