@@ -1,5 +1,14 @@
+from flask import (
+    render_template,
+    request,
+    redirect,
+    url_for,
+    flash,
+    session,
+    make_response,
+)
+
 from app.forms import LoginForm
-from flask import render_template, request, redirect, url_for, flash, session, make_response
 from app.users import users_bp
 
 

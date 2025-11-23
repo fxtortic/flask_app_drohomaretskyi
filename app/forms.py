@@ -1,5 +1,12 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, BooleanField, SubmitField, SelectField, TextAreaField
+from wtforms import (
+    StringField,
+    PasswordField,
+    BooleanField,
+    SubmitField,
+    SelectField,
+    TextAreaField,
+)
 from wtforms.validators import DataRequired, Email, Length, Regexp
 
 
@@ -43,25 +50,77 @@ class ContactForm(FlaskForm):
         "Message",
         validators=[
             DataRequired(message="Повідомлення є обов'язковим"),
-            Length(max=500, message="Повідомлення не повинно перевищувати 500 символів"),
+            Length(
+                max=500,
+                message="Повідомлення не повинно перевищувати 500 символів",
+            ),
         ],
     )
 
     submit = SubmitField("Send")
 
+
 class LoginForm(FlaskForm):
     username = StringField(
         "Username / Email",
         validators=[
-            DataRequired(message="Поле обов'язкове")
-        ]
+            DataRequired(message="Поле обов'язкове"),
+        ],
     )
     password = PasswordField(
         "Password",
         validators=[
             DataRequired(message="Поле обов'язкове"),
-            Length(min=4, max=10, message="Пароль має бути від 4 до 10 символів"),
-        ]
+            Length(
+                min=4,
+                max=10,
+                message="Пароль має бути від 4 до 10 символів",
+            ),
+        ],
     )
     remember = BooleanField("Запам'ятати мене")
     submit = SubmitField("Sign in")
+
+
+class PostForm(FlaskForm):
+    title = StringField(
+        "Заголовок",
+        validators=[
+            DataRequired(message="Заголовок є обов'язковим"),
+            Length(max=150, message="Максимальна довжина заголовка — 150 символів"),
+        ],
+    )
+
+    content = TextAreaField(
+        "Текст",
+        validators=[
+            DataRequired(message="Текст є обов'язковим"),
+        ],
+    )
+
+    category = SelectField(
+        "Категорія",
+        choices=[
+            ("news", "Новина"),
+            ("publication", "Публікація"),
+            ("tech", "Технічна"),
+            ("other", "Інше"),
+        ],
+        validators=[DataRequired(message="Оберіть категорію")],
+    )
+
+    is_active = BooleanField("Публікувати зараз", default=True)
+
+    author = StringField(
+        "Автор",
+        validators=[
+            DataRequired(message="Автор є обов'язковим"),
+            Length(
+                max=20,
+                message="Ім'я автора не повинно перевищувати 20 символів",
+            ),
+        ],
+        default="Anonymous",
+    )
+
+    submit = SubmitField("Зберегти")

@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="posts-page">
+  <h1>Список постів</h1>
+
+  <p>
+    <a class="btn-primary" href="{{ url_for('posts.create') }}">
+      Створити пост
+    </a>
+  </p>
+
+  {% if posts %}
+    <ul class="posts-list">
+      {% for post in posts %}
+        <li>
+          <h5>
+            <a href="{{ url_for('posts.detail', post_id=post.id) }}">
+              {{ post.title }}
+            </a>
+          </h5>
+          <div class="post-meta">
+            Категорія: {{ post.category }},
+            автор: {{ post.author }},
+            опубліковано: {{ post.posted.strftime('%Y-%m-%d %H:%M') }}
+          </div>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>Поки що немає жодного поста.</p>
+  {% endif %}
+</div>
+{% endblock %}

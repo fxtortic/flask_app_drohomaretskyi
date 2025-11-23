@@ -55,7 +55,9 @@ footer {
     margin-top: auto;
 }
 
-textarea, input, button {
+textarea,
+input,
+button {
     border-radius: 6px !important;
 }
 
@@ -149,6 +151,61 @@ ul.flashes {
     border-radius: 6px;
     cursor: pointer;
 }
+
 .btn-primary:hover {
     background: #0b5ed7;
+}
+
+
+.posts-page {
+    max-width: 800px;
+    margin: 20px auto;
+}
+
+.posts-page h1 {
+    margin-bottom: 15px;
+}
+
+.posts-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.posts-list li {
+    padding: 10px 0;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.posts-list li:last-child {
+    border-bottom: none;
+}
+
+.posts-list a {
+    font-weight: 600;
+    color: #0d6efd;
+    text-decoration: none;
+}
+
+.posts-list a:hover {
+    text-decoration: underline;
+}
+
+.post-meta {
+    font-size: 0.85rem;
+    color: #6c757d;
+}
+
+.post-detail {
+    max-width: 800px;
+    margin: 20px auto;
+}
+
+.post-detail h1 {
+    margin-bottom: 10px;
+}
+
+.post-detail .post-content {
+    margin-top: 15px;
+    line-height: 1.5;
 }
