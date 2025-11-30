@@ -1,67 +1,88 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, BooleanField, SubmitField, SelectField, TextAreaField
-from wtforms.validators import DataRequired, Email, Length, Regexp
+from wtforms import (
+    StringField,
+    PasswordField,
+    BooleanField,
+    TextAreaField,
+    SelectField,
+    SelectMultipleField,
+    SubmitField,
+)
+from wtforms.validators import DataRequired, Length, Email
 
+
+# ---------- ContactForm ----------
 
 class ContactForm(FlaskForm):
     name = StringField(
-        "Name",
-        validators=[
-            DataRequired(message="Ім'я є обов'язковим"),
-            Length(min=4, max=10, message="Ім'я має бути від 4 до 10 символів"),
-        ],
+        "Імʼя",
+        validators=[DataRequired(), Length(min=2, max=50)],
     )
-
     email = StringField(
-        "Email",
-        validators=[
-            DataRequired(message="Email є обов'язковим"),
-            Email(message="Введіть коректну адресу email"),
-        ],
+        "E-mail",
+        validators=[DataRequired(), Email(), Length(max=120)],
     )
-
     phone = StringField(
-        "Phone",
-        validators=[
-            DataRequired(message="Телефон є обов'язковим"),
-            Regexp(r"^\+380\d{9}$", message="Формат телефону: +380XXXXXXXXX"),
-        ],
+        "Телефон",
+        validators=[Length(max=20)],
     )
-
-    subject = SelectField(
-        "Subject",
+    topic = SelectField(
+        "Тема",
         choices=[
-            ("support", "Підтримка"),
             ("question", "Запитання"),
-            ("job", "Співпраця / робота"),
+            ("order", "Замовлення"),
             ("other", "Інше"),
         ],
-        validators=[DataRequired(message="Оберіть тему звернення")],
     )
-
     message = TextAreaField(
-        "Message",
-        validators=[
-            DataRequired(message="Повідомлення є обов'язковим"),
-            Length(max=500, message="Повідомлення не повинно перевищувати 500 символів"),
-        ],
+        "Повідомлення",
+        validators=[DataRequired(), Length(min=5)],
     )
+    submit = SubmitField("Надіслати")
 
-    submit = SubmitField("Send")
+
+
+# ---------- LoginForm ----------
 
 class LoginForm(FlaskForm):
     username = StringField(
-        "Username / Email",
-        validators=[
-            DataRequired(message="Поле обов'язкове")
-        ]
+        "Username",
+        validators=[DataRequired(), Length(min=3, max=50)],
     )
     password = PasswordField(
         "Password",
-        validators=[
-            DataRequired(message="Поле обов'язкове"),
-            Length(min=4, max=10, message="Пароль має бути від 4 до 10 символів"),
-        ]
+        validators=[DataRequired(), Length(min=3, max=100)],
     )
-    remember = BooleanField("Запам'ятати мене")
-    submit = SubmitField("Sign in")
+    remember = BooleanField("Remember me")
+    submit = SubmitField("Login")
+
+
+# ---------- PostForm (для постів / тегів) ----------
+
+class PostForm(FlaskForm):
+    title = StringField(
+        "Title",
+        validators=[DataRequired(), Length(min=3, max=200)],
+    )
+    body = TextAreaField(
+        "Content",
+        validators=[DataRequired(), Length(min=3)],
+    )
+
+    author_id = SelectField("Author", coerce=int, validators=[DataRequired()])
+    tags = SelectMultipleField("Tags", coerce=int)
+
+    submit = SubmitField("Add Post")
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        from app.users.models import User
+        from app.posts.models import Tag
+
+        self.author_id.choices = [
+            (u.id, u.username) for u in User.query.order_by(User.id)
+        ]
+        self.tags.choices = [
+            (t.id, t.name) for t in Tag.query.order_by(Tag.name)
+        ]

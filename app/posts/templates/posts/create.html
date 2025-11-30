@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}New Post{% endblock %}
+
+{% block content %}
+  <h1>New Post</h1>
+
+  <form method="post">
+    {{ form.hidden_tag() }}
+
+    <p>
+      {{ form.title.label }}<br>
+      {{ form.title(size=60) }}<br>
+      {% for error in form.title.errors %}
+        <span class="error">{{ error }}</span>
+      {% endfor %}
+    </p>
+
+    <p>
+      {{ form.body.label }}<br>
+      {{ form.body(rows=5, cols=60) }}<br>
+      {% for error in form.body.errors %}
+        <span class="error">{{ error }}</span>
+      {% endfor %}
+    </p>
+
+    <p>
+      {{ form.author_id.label }}<br>
+      {{ form.author_id() }}
+    </p>
+
+    <p>
+      {{ form.tags.label }}<br>
+      {{ form.tags(multiple=True) }}
+    </p>
+
+    <p>{{ form.submit() }}</p>
+  </form>
+{% endblock %}

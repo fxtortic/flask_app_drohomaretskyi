@@ -5,6 +5,7 @@ from flask_migrate import Migrate
 from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy import MetaData
 
+
 class Base(DeclarativeBase):
     metadata = MetaData(
         naming_convention={
@@ -28,6 +29,8 @@ migrate = Migrate(app, db)
 from app import views
 from app.users import users_bp
 from app.products import products_bp
+from app.posts import posts_bp
 
 app.register_blueprint(users_bp)
 app.register_blueprint(products_bp)
+app.register_blueprint(posts_bp)
