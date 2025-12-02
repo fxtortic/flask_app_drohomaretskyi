@@ -5,11 +5,12 @@
     <a href="{{ url_for('users.greetings', name='john') }}">Користувач John</a> |
     <a href="{{ url_for('products.list_products') }}">Продукти</a> |
 
-    {% if session.get('user') %}
-        <!-- якщо брати без умови, то стоїть умова що якщо ти не авторизований і заходиш на профайл він перевідправляє на логін /!-->
+    {% if current_user.is_authenticated %}
         <a href="{{ url_for('users.profile') }}">Профіль</a> |
-        <a href="{{ url_for('users.logout') }}">Вийти</a>
+        <a href="{{ url_for('users.users_list') }}">Користувачі</a> |
+        <a href="{{ url_for('users.logout') }}">Вихід</a>
     {% else %}
+        <a href="{{ url_for('users.register') }}">Реєстрація</a> |
         <a href="{{ url_for('users.login') }}">Вхід</a>
     {% endif %}
 </nav>

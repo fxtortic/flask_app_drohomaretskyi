@@ -8,11 +8,16 @@ from wtforms import (
     SelectMultipleField,
     SubmitField,
 )
-from wtforms.validators import DataRequired, Length, Email
+from wtforms.validators import (
+    DataRequired,
+    Length,
+    Email,
+    EqualTo,
+    ValidationError,
+)
 
 
 # ---------- ContactForm ----------
-
 class ContactForm(FlaskForm):
     name = StringField(
         "Імʼя",
@@ -41,9 +46,7 @@ class ContactForm(FlaskForm):
     submit = SubmitField("Надіслати")
 
 
-
 # ---------- LoginForm ----------
-
 class LoginForm(FlaskForm):
     username = StringField(
         "Username",
@@ -57,8 +60,45 @@ class LoginForm(FlaskForm):
     submit = SubmitField("Login")
 
 
-# ---------- PostForm (для постів / тегів) ----------
+# ---------- RegistrationForm ----------
+class RegistrationForm(FlaskForm):
+    username = StringField(
+        "Username",
+        validators=[DataRequired(), Length(min=3, max=50)],
+    )
+    email = StringField(
+        "E-mail",
+        validators=[DataRequired(), Email(), Length(max=120)],
+    )
+    password = PasswordField(
+        "Password",
+        validators=[DataRequired(), Length(min=3, max=100)],
+    )
+    confirm_password = PasswordField(
+        "Confirm Password",
+        validators=[
+            DataRequired(),
+            EqualTo("password", message="Паролі мають збігатися."),
+        ],
+    )
+    submit = SubmitField("Sign up")
 
+    def validate_username(self, field: StringField) -> None:
+        from app.users.models import User
+
+        user = User.query.filter_by(username=field.data).first()
+        if user:
+            raise ValidationError("Користувач з таким username вже існує.")
+
+    def validate_email(self, field: StringField) -> None:
+        from app.users.models import User
+
+        user = User.query.filter_by(email=field.data).first()
+        if user:
+            raise ValidationError("Користувач з таким email вже існує.")
+
+
+# ---------- PostForm (для постів / тегів) ----------
 class PostForm(FlaskForm):
     title = StringField(
         "Title",
@@ -68,10 +108,8 @@ class PostForm(FlaskForm):
         "Content",
         validators=[DataRequired(), Length(min=3)],
     )
-
     author_id = SelectField("Author", coerce=int, validators=[DataRequired()])
     tags = SelectMultipleField("Tags", coerce=int)
-
     submit = SubmitField("Add Post")
 
     def __init__(self, *args, **kwargs):
