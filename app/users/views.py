@@ -4,7 +4,6 @@ from flask import (
     redirect,
     url_for,
     flash,
-    make_response,
 )
 from flask_login import (
     login_user,
@@ -14,8 +13,9 @@ from flask_login import (
 )
 
 from app.users import users_bp
-from app.forms import LoginForm, RegistrationForm
+from app.forms import LoginForm, RegistrationForm, UpdateAccountForm, ChangePasswordForm
 from app.users.models import User
+from app.users.utils import save_profile_picture
 from app import db
 
 
@@ -26,7 +26,6 @@ def greetings(name):
     return render_template("users/hi.html", name=name, age=age)
 
 
-# ---------- РЕЄСТРАЦІЯ ----------
 @users_bp.route("/register", methods=["GET", "POST"])
 def register():
     if current_user.is_authenticated:
@@ -53,7 +52,6 @@ def register():
     return render_template("users/register.html", page_title="Register", form=form)
 
 
-# ---------- ВХІД ----------
 @users_bp.route("/login", methods=["GET", "POST"])
 def login():
     if current_user.is_authenticated:
@@ -82,88 +80,62 @@ def login():
     return render_template("users/login.html", page_title="Login", form=form)
 
 
-# ---------- ПРОФІЛЬ (ЗАХИЩЕНИЙ @login_required) ----------
 @users_bp.route("/profile", methods=["GET", "POST"])
 @login_required
 def profile():
-    username = current_user.username
+    form = UpdateAccountForm()
 
-    if request.method == "POST":
-        action = request.form.get("action")
+    if form.validate_on_submit():
+        if form.picture.data:
+            picture_file = save_profile_picture(form.picture.data)
+            current_user.image = picture_file
 
-        if action == "add":
-            key = request.form.get("cookie_key", "").strip()
-            value = request.form.get("cookie_value", "").strip()
-            max_age = request.form.get("cookie_max_age", "").strip()
+        current_user.username = form.username.data
+        current_user.email = form.email.data
+        current_user.about_me = form.about_me.data
 
-            if not key or not value:
-                flash("Ключ і значення кукі обовʼязкові.", "error")
-                return redirect(url_for("users.profile"))
+        db.session.commit()
+        flash("Ваш профіль оновлено!", "success")
+        return redirect(url_for("users.profile"))
 
-            resp = make_response(redirect(url_for("users.profile")))
-            if max_age.isdigit():
-                resp.set_cookie(key, value, max_age=int(max_age))
-            else:
-                resp.set_cookie(key, value)
+    elif request.method == "GET":
+        form.username.data = current_user.username
+        form.email.data = current_user.email
+        form.about_me.data = current_user.about_me
 
-            flash(f"Кука '{key}' додана.", "success")
-            return resp
-
-        if action == "delete_one":
-            key = request.form.get("cookie_delete_key", "").strip()
-            if not key:
-                flash("Вкажіть ключ кукі для видалення.", "error")
-                return redirect(url_for("users.profile"))
-
-            resp = make_response(redirect(url_for("users.profile")))
-            resp.delete_cookie(key)
-            flash(f"Кука '{key}' видалена (якщо вона існувала).", "info")
-            return resp
-
-        if action == "delete_all":
-            resp = make_response(redirect(url_for("users.profile")))
-            for ckey in request.cookies.keys():
-                if ckey == "session":
-                    continue
-                resp.delete_cookie(ckey)
-            flash("Усі кукі (крім сесійної) видалені.", "info")
-            return resp
-
-    cookies_dict = request.cookies
-    current_theme = request.cookies.get("profile_theme", "light")
+    image_file = url_for(
+        "static",
+        filename="profile_pics/" + (current_user.image or "profile_default.jpg"),
+    )
 
     return render_template(
         "users/profile.html",
-        page_title="Profile",
-        user=username,
-        cookies=cookies_dict,
-        theme=current_theme,
+        page_title="Профіль",
+        user=current_user,
+        form=form,
+        image_file=image_file,
     )
 
-
-# ---------- ВИХІД ----------
-@users_bp.route("/logout")
+@users_bp.route("/change-password", methods=["GET", "POST"])
 @login_required
-def logout():
-    logout_user()
-    flash("Ви вийшли із системи.", "info")
-    return redirect(url_for("users.login"))
+def change_password():
+    form = ChangePasswordForm()
 
+    if form.validate_on_submit():
+        if not current_user.check_password(form.current_password.data):
+            flash("Поточний пароль вказано неправильно.", "error")
+        else:
+            current_user.set_password(form.new_password.data)
+            db.session.commit()
+            flash("Пароль успішно змінено.", "success")
+            return redirect(url_for("users.profile"))
 
-# ---------- ЗМІНА КОЛЬОРОВОЇ СХЕМИ ----------
-@users_bp.route("/set-theme/<string:scheme>")
-@login_required
-def set_theme(scheme: str):
-    allowed = {"light", "dark", "blue"}
-    if scheme not in allowed:
-        flash("Невідома кольорова схема.", "error")
-        return redirect(url_for("users.profile"))
+    return render_template(
+        "users/change_password.html",
+        page_title="Change Password",
+        form=form,
+    )
 
-    resp = make_response(redirect(url_for("users.profile")))
-    resp.set_cookie("profile_theme", scheme, max_age=30 * 24 * 60 * 60)
-
-    flash(f"Кольорова схема змінена на '{scheme}'.", "info")
-    return resp
 
 @users_bp.route("/users-list")
 @login_required
@@ -171,8 +143,16 @@ def users_list():
     users = User.query.order_by(User.id).all()
     total = len(users)
     return render_template(
-        "users/users_list.html",
+        "users/list.html",
         page_title="Усі користувачі",
         users=users,
         total=total,
     )
+
+
+@users_bp.route("/logout")
+@login_required
+def logout():
+    logout_user()
+    flash("Ви вийшли із системи.", "info")
+    return redirect(url_for("users.login"))

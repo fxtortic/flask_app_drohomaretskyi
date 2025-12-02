@@ -8,6 +8,7 @@
     {% if current_user.is_authenticated %}
         <a href="{{ url_for('users.profile') }}">Профіль</a> |
         <a href="{{ url_for('users.users_list') }}">Користувачі</a> |
+        <a href="{{ url_for('users.change_password') }}">Зміна пароля</a> |
         <a href="{{ url_for('users.logout') }}">Вихід</a>
     {% else %}
         <a href="{{ url_for('users.register') }}">Реєстрація</a> |

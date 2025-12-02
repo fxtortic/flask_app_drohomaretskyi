@@ -16,6 +16,10 @@ from wtforms.validators import (
     ValidationError,
 )
 
+# НОВЕ:
+from flask_wtf.file import FileField, FileAllowed
+from flask_login import current_user
+
 
 # ---------- ContactForm ----------
 class ContactForm(FlaskForm):
@@ -98,6 +102,44 @@ class RegistrationForm(FlaskForm):
             raise ValidationError("Користувач з таким email вже існує.")
 
 
+# ---------- UpdateAccountForm ----------
+class UpdateAccountForm(FlaskForm):
+    username = StringField(
+        "Username",
+        validators=[DataRequired(), Length(min=3, max=50)],
+    )
+    email = StringField(
+        "E-mail",
+        validators=[DataRequired(), Email(), Length(max=120)],
+    )
+    about_me = TextAreaField(
+        "Про себе",
+        validators=[Length(max=500)],
+    )
+
+    picture = FileField(
+        "Update Profile Picture",
+        validators=[FileAllowed(["jpg", "jpeg", "png"])],
+    )
+
+    submit = SubmitField("Оновити профіль")
+
+    def validate_username(self, field: StringField) -> None:
+        if field.data != current_user.username:
+            from app.users.models import User
+
+            user = User.query.filter_by(username=field.data).first()
+            if user:
+                raise ValidationError("Користувач з таким username вже існує.")
+
+    def validate_email(self, field: StringField) -> None:
+        if field.data != current_user.email:
+            from app.users.models import User
+
+            user = User.query.filter_by(email=field.data).first()
+            if user:
+                raise ValidationError("Користувач з таким email вже існує.")
+
 # ---------- PostForm (для постів / тегів) ----------
 class PostForm(FlaskForm):
     title = StringField(
@@ -124,3 +166,21 @@ class PostForm(FlaskForm):
         self.tags.choices = [
             (t.id, t.name) for t in Tag.query.order_by(Tag.name)
         ]
+
+class ChangePasswordForm(FlaskForm):
+    current_password = PasswordField(
+        "Current Password",
+        validators=[DataRequired(), Length(min=3, max=100)],
+    )
+    new_password = PasswordField(
+        "New Password",
+        validators=[DataRequired(), Length(min=3, max=100)],
+    )
+    confirm_new_password = PasswordField(
+        "Confirm Password",
+        validators=[
+            DataRequired(),
+            EqualTo("new_password", message="Field must be equal to new_password."),
+        ],
+    )
+    submit = SubmitField("Change Password")

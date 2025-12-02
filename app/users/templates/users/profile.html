@@ -1,67 +1,67 @@
 {% extends "base.html" %}
+{% from "partials/_render_field.html" import render_field %}
 
 {% block content %}
 
-{# Клас для теми: light / dark / blue #}
-<div class="profile-page {{ theme }}">
+<div class="profile-page">
+
     <h1>Профіль</h1>
-    <p>Вітаю, {{ user }}! Ви успішно увійшли до системи.</p>
+    <p>Вітаю, {{ user.username }}! Ви успішно увійшли до системи.</p>
 
-    <form action="{{ url_for('users.logout') }}" method="get" style="margin-bottom: 20px;">
-        <button type="submit">Вийти</button>
-    </form>
+    <div class="account-wrapper" style="display: flex; gap: 40px; align-items: flex-start;">
 
-    <h3>Вибір кольорової схеми:</h3>
-    <p>
-        <a href="{{ url_for('users.set_theme', scheme='light') }}">Світла</a> |
-        <a href="{{ url_for('users.set_theme', scheme='dark') }}">Темна</a> |
-        <a href="{{ url_for('users.set_theme', scheme='blue') }}">Синя</a>
-    </p>
+        <div class="account-info">
 
-    <hr>
+            <img src="{{ image_file }}"
+                 alt="Profile picture of {{ user.username }}"
+                 style="width: 128px; height: 128px; border-radius: 50%; object-fit: cover;">
 
-    <h2>Додати кукі:</h2>
-    <form method="post" action="{{ url_for('users.profile') }}" style="margin-bottom: 20px;">
-        <input type="hidden" name="action" value="add">
-        <label for="cookie_key">Ключ кукі:</label>
-        <input type="text" id="cookie_key" name="cookie_key" required>
+            <p><strong>Username:</strong> {{ user.username }}</p>
+            <p><strong>E-mail:</strong> {{ user.email or "-" }}</p>
 
-        <label for="cookie_value">Значення кукі:</label>
-        <input type="text" id="cookie_value" name="cookie_value" required>
+            <p>
+                <strong>Про себе:</strong>
+                {{ user.about_me or "Користувач ще нічого про себе не написав." }}
+            </p>
 
-        <label for="cookie_max_age">Термін дії (сек):</label>
-        <input type="text" id="cookie_max_age" name="cookie_max_age" placeholder="наприклад 60">
+            <p>
+                <strong>Останній візит:</strong>
+                {% if user.last_seen %}
+                    {{ user.last_seen.strftime('%Y-%m-%d %H:%M:%S') }}
+                {% else %}
+                    ще не зафіксовано
+                {% endif %}
+            </p>
 
-        <button type="submit">Додати кукі</button>
-    </form>
+        </div>
 
-    <h2>Видалити кукі за ключем:</h2>
-    <form method="post" action="{{ url_for('users.profile') }}" style="margin-bottom: 20px;">
-        <input type="hidden" name="action" value="delete_one">
-        <label for="cookie_delete_key">Ключ кукі для видалення:</label>
-        <input type="text" id="cookie_delete_key" name="cookie_delete_key" required>
-        <button type="submit">Видалити кукі за ключем</button>
-    </form>
+        <div class="account-form" style="flex: 1;">
 
-    <h2>Видалити всі кукі:</h2>
-    <form method="post" action="{{ url_for('users.profile') }}" style="margin-bottom: 20px;">
-        <input type="hidden" name="action" value="delete_all">
-        <button type="submit">Видалити всі кукі</button>
-    </form>
+            <h2>Оновити профіль</h2>
 
-    <h2>Список всіх кукі:</h2>
-    <table border="1" cellpadding="5" cellspacing="0">
-        <tr>
-            <th>Ключ</th>
-            <th>Значення</th>
-        </tr>
-        {% for k, v in cookies.items() %}
-        <tr>
-            <td>{{ k }}</td>
-            <td>{{ v }}</td>
-        </tr>
-        {% endfor %}
-    </table>
+            <form method="post"
+                  action="{{ url_for('users.profile') }}"
+                  enctype="multipart/form-data">
+
+                {{ form.hidden_tag() }}
+
+                {{ render_field(form.username) }}
+                {{ render_field(form.email) }}
+                {{ render_field(form.about_me) }}
+
+                <div class="form-group">
+                    {{ form.picture.label }}
+                    {{ form.picture() }}
+                    {% for error in form.picture.errors %}
+                        <span class="error" style="color: red;">{{ error }}</span>
+                    {% endfor %}
+                </div>
+
+                {{ form.submit(class="btn-primary") }}
+
+            </form>
+        </div>
+    </div>
 </div>
 
 {% endblock %}

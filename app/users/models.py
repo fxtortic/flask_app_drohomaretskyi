@@ -1,4 +1,8 @@
-from sqlalchemy import Integer, String
+from __future__ import annotations
+
+from datetime import datetime
+
+from sqlalchemy import Integer, String, Text, DateTime
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from flask_login import UserMixin
 
@@ -11,6 +15,17 @@ class User(UserMixin, db.Model):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     username: Mapped[str] = mapped_column(String(50), unique=True, nullable=False)
     email: Mapped[str | None] = mapped_column(String(120), unique=True)
+
+    image: Mapped[str | None] = mapped_column(
+        String(128),
+        nullable=True,
+        default="profile_default.jpg",
+    )
+
+    about_me: Mapped[str | None] = mapped_column(Text, nullable=True)
+
+    last_seen: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+
     password_hash: Mapped[str | None] = mapped_column(String(128), nullable=True)
 
     posts: Mapped[list["Post"]] = relationship(

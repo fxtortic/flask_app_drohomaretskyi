@@ -2,7 +2,8 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_bcrypt import Bcrypt
-from flask_login import LoginManager
+from flask_login import LoginManager, current_user
+from datetime import datetime
 
 from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy import MetaData
@@ -49,3 +50,9 @@ from app.users.models import User
 @login_manager.user_loader
 def load_user(user_id: str):
     return User.query.get(int(user_id))
+
+@app.before_request
+def update_last_seen() -> None:
+    if current_user.is_authenticated:
+        current_user.last_seen = datetime.utcnow()
+        db.session.commit()
